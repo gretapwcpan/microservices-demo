@@ -1,0 +1,186 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "ai_quanBuy" }}
+
+{{ template "header" . }}
+
+<!-- React and CSS -->
+<link rel="stylesheet" href="{{ $.baseUrl }}/static/css/react-components.css">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<style>
+.quanbuy-app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.quanbuy-app .app-section {
+    margin-bottom: 2rem;
+}
+
+.question-form {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.question-form h5 {
+    color: #1f2937;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.question-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.question-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-group select {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    font-family: inherit;
+}
+
+.analyze-btn {
+    width: 100%;
+    padding: 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.analyze-btn:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.analyze-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 768px) {
+    .quanbuy-app {
+        padding: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
+  <span class="platform-flag">
+    {{$.platform_name}}
+  </span>
+</div>
+
+<main role="main">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="mb-4">🎨 AI Personal quanBuy</h1>
+        <p class="lead mb-4">Get expert fashion advice powered by AI. Upload your photo and let our quanBuy help you look amazing!</p>
+        
+        <!-- React App Mount Point -->
+        <div id="quanbuy-app"></div>
+        
+        <!-- Loading state while React loads -->
+        <div id="loading-fallback" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading AI quanBuy...</span>
+          </div>
+          <p class="mt-3 text-muted">Loading your personal styling assistant...</p>
+        </div>
+        
+        <!-- Fallback for non-JavaScript browsers -->
+        <noscript>
+          <div class="alert alert-warning">
+            <h5>JavaScript Required</h5>
+            <p>This application requires JavaScript to function properly. Please enable JavaScript in your browser.</p>
+          </div>
+        </noscript>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Load React Components -->
+<script src="{{ $.baseUrl }}/static/js/react-components.js"></script>
+<script>
+// Hide loading fallback once React mounts
+document.addEventListener('DOMContentLoaded', function() {
+  // Wait a moment for React to potentially mount
+  setTimeout(function() {
+    const loadingFallback = document.getElementById('loading-fallback');
+    const reactApp = document.getElementById('quanbuy-app');
+    
+    // If React app has content, hide the loading fallback
+    if (reactApp && reactApp.children.length > 0) {
+      if (loadingFallback) {
+        loadingFallback.style.display = 'none';
+      }
+    }
+  }, 1000);
+});
+</script>
+
+{{ template "footer" . }}
+{{ end }}

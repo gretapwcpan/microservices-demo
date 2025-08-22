@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM --platform=$BUILDPLATFORM golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS builder
+# Node.js stage for React components
+FROM --platform=$BUILDPLATFORM node:18-alpine AS node-builder
+WORKDIR /app
+COPY package*.json ./
+COPY webpack.config.js .babelrc ./
+RUN npm ci
+COPY src/ ./src/
+RUN npm run build
+
+# Go stage
+FROM --platform=$BUILDPLATFORM golang:1.23.4-alpine@sha256:c23339199a08b0e12032856908589a6d41a0dab141b8b3b21f156fc571a3f1d3 AS go-builder
 ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /src
@@ -22,13 +32,16 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
+# Copy built React components
+COPY --from=node-builder /app/static/js ./static/js
+
 # Skaffold passes in debug-oriented compiler flags
 ARG SKAFFOLD_GO_GCFLAGS
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend .
 
 FROM scratch
 WORKDIR /src
-COPY --from=builder /go/bin/frontend /src/server
+COPY --from=go-builder /go/bin/frontend /src/server
 COPY ./templates ./templates
 COPY ./static ./static
 
