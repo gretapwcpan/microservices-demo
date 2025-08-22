@@ -23,7 +23,7 @@ namespace cartservice.cartstore
     public class SpannerCartStore : ICartStore
     {
         private static readonly string TableName = "CartItems";
-        private static readonly string DefaultInstanceName = "onlineboutique";
+        private static readonly string DefaultInstanceName = "quanbuy";
         private static readonly string DefaultDatabaseName = "carts";
         private readonly string databaseString;
 

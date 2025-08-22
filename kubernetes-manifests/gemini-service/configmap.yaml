@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gcp-config
+  namespace: quanbuy
+data:
+  project-id: "quanbuy-project"  # Replace with your actual GCP project ID
+  region: "us-central1"
+  firestore-database: "(default)"
+  pubsub-topic: "search-events"
+  redis-endpoint: "redis-service:6379"

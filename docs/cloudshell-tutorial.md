@@ -39,7 +39,7 @@ In order to create a GKE cluster, you'll need to **[create a Google Cloud projec
 
 4. Apply the following configurations in the GKE wizard:  
 > - Zone: us-central1-b
-> - Cluster name: onlineboutique
+> - Cluster name: quanbuy
 > - Node count: 4
 > - Machine type: e2-standard-2
 

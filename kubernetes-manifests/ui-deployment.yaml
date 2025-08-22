@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-server
+  namespace: quanbuy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui-server
+  template:
+    metadata:
+      labels:
+        app: ui-server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html
+        configMap:
+          name: ui-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ui-server
+  namespace: quanbuy
+spec:
+  type: NodePort
+  selector:
+    app: ui-server
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080

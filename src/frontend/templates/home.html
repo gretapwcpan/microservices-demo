@@ -1,5 +1,5 @@
 <!--
- Copyright 2020 Google LLC
+ Copyright 2024 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -17,64 +17,89 @@
 {{ define "home" }}
 
 {{ template "header" . }}
-<div {{ with $.platform_css }} class="{{.}}" {{ end }}>
-  <span class="platform-flag">
-    {{$.platform_name}}
-  </span>
+
+<style>
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.redirect-container {
+    text-align: center;
+    color: white;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    max-width: 600px;
+}
+
+.redirect-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #fff, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.redirect-message {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+.redirect-button {
+    display: inline-block;
+    padding: 1rem 3rem;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.redirect-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-top: 2rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<div class="redirect-container">
+    <h1 class="redirect-title">🛍️ Welcome to quanBuy</h1>
+    <p class="redirect-message">Discover products with AI-powered search</p>
+    <a href="{{ $.baseUrl }}/quanbuy" class="redirect-button">Start Shopping →</a>
+    <div class="loading-spinner"></div>
 </div>
-<main role="main" class="home">
 
-  <!-- The image at the top of the home page, displayed on smaller screens. -->
-  <div class="home-mobile-hero-banner d-lg-none"></div>
+<script>
+// Auto-redirect after 2 seconds
+setTimeout(function() {
+    window.location.href = "{{ $.baseUrl }}/quanbuy";
+}, 2000);
+</script>
 
-  <div class="container-fluid">
-    <div class="row">
-
-      <!-- The image on the left of the home page, displayed on larger screens. -->
-      <!--<div class="col-4 d-none d-lg-block home-desktop-left-image"></div>-->
-      <!-- @TODO: removed temporarily. When uncommenting, also replace below div with this -->
-      <!--<div class="col-12 col-lg-8">-->
-
-      <div class="col-12 col-lg-12 px-10-percent">
-
-        <div class="row hot-products-row px-xl-6">
-
-          <div class="col-12">
-            <h3>Hot Products</h3>
-          </div>
-
-          {{ range $.products }}
-          <div class="col-md-4 hot-product-card">
-            <a href="{{ $.baseUrl }}/product/{{.Item.Id}}">
-              <img loading="lazy" src="{{ $.baseUrl }}{{.Item.Picture}}">
-              <div class="hot-product-card-img-overlay"></div>
-            </a>
-            <div>
-              <div class="hot-product-card-name">{{ .Item.Name }}</div>
-              <div class="hot-product-card-price">{{ renderMoney .Price }}</div>
-            </div>
-          </div>
-          {{ end }}
-
-        </div>
-
-        <!-- Footer for larger screens. -->
-        <div class="row d-none d-lg-block home-desktop-footer-row">
-          <div class="col-12 p-0">
-            {{ template "footer" . }}
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-</main>
-
-<!-- Footer for smaller screens. -->
-<div class="d-lg-none">
-  {{ template "footer" . }}
-</div>
-
+{{ template "footer" . }}
 {{ end }}

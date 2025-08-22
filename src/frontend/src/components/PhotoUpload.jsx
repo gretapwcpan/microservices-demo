@@ -103,8 +103,8 @@ const PhotoUpload = ({ onPhotoSelect, currentPhoto }) => {
         ) : (
           <div className="upload-placeholder">
             <div className="upload-icon">📷</div>
-            <h3>Upload Your Photo</h3>
-            <p>Click to upload or drag and drop your outfit photo</p>
+            <h3>Upload Product Photo</h3>
+            <p>Upload a photo of an item you want to find across different stores</p>
             <button className="upload-btn">Choose Photo</button>
             <div className="upload-hints">
               <small>Supports JPG, PNG • Max 5MB</small>

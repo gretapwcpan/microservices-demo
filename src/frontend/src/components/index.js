@@ -1,143 +1,96 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import PhotoUpload from './PhotoUpload.jsx';
-import VoiceInput from './VoiceInput.jsx';
-import AnalysisResults from './AnalysisResults.jsx';
+import ShoppingInput from './ShoppingInput.jsx';
+import ProductResults from './ProductResults.jsx';
 
 // Main QuanBuy App Component
 const QuanBuyApp = () => {
   const [photo, setPhoto] = React.useState(null);
-  const [questionText, setQuestionText] = React.useState('');
-  const [occasion, setOccasion] = React.useState('');
-  const [budget, setBudget] = React.useState('');
-  const [analysisResults, setAnalysisResults] = React.useState(null);
-  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [searchResults, setSearchResults] = React.useState(null);
+  const [isSearching, setIsSearching] = React.useState(false);
+  const [showPhotoUpload, setShowPhotoUpload] = React.useState(true);
 
   const handlePhotoSelect = (photoData) => {
     setPhoto(photoData);
   };
 
-  const handleVoiceInput = (transcript) => {
-    console.log('Voice input received:', transcript);
-  };
-
-  const handleTextChange = (text) => {
-    setQuestionText(text);
-  };
-
-  const handleAnalyze = async () => {
-    if (!photo || !questionText.trim()) {
-      alert('Please upload a photo and ask a question');
+  const handleSearchRequest = async (searchData) => {
+    const { type, prompt, stores } = searchData;
+    
+    if (type !== 'prompt' && !photo) {
+      alert('Please upload a photo for visual search');
       return;
     }
 
-    setIsAnalyzing(true);
+    setIsSearching(true);
+    setSearchResults(null);
     
     try {
-      const response = await fetch('/api/analyze-style', {
+      const requestBody = {
+        search_type: type,
+        user_id: 'web-user',
+        stores: stores.map(s => ({ name: s.name, url: s.url }))
+      };
+
+      if (photo && (type === 'photo' || type === 'both')) {
+        requestBody.image_base64 = photo.base64;
+      }
+
+      if (prompt && (type === 'prompt' || type === 'both')) {
+        requestBody.search_prompt = prompt;
+      }
+
+      const response = await fetch('/api/search-products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          image_base64: photo.base64,
-          user_question: questionText,
-          occasion: occasion,
-          budget_range: budget,
-          user_id: 'web-user'
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.statusText}`);
+        throw new Error(`Search failed: ${response.statusText}`);
       }
 
       const results = await response.json();
-      setAnalysisResults(results);
+      setSearchResults(results);
     } catch (error) {
-      console.error('Analysis error:', error);
-      setAnalysisResults({ error: error.message });
+      console.error('Search error:', error);
+      setSearchResults({ error: error.message });
     } finally {
-      setIsAnalyzing(false);
+      setIsSearching(false);
     }
   };
 
   const handleRetry = () => {
-    setAnalysisResults(null);
+    setSearchResults(null);
     setPhoto(null);
-    setQuestionText('');
-    setOccasion('');
-    setBudget('');
+    setShowPhotoUpload(true);
   };
 
   return (
     <div className="quanbuy-app">
-      <div className="app-section">
-        <PhotoUpload 
-          onPhotoSelect={handlePhotoSelect}
-          currentPhoto={photo}
-        />
-      </div>
-
-      <div className="app-section">
-        <VoiceInput 
-          onVoiceInput={handleVoiceInput}
-          onTextChange={handleTextChange}
-          currentText={questionText}
-        />
-      </div>
-
-      <div className="app-section">
-        <div className="question-form">
-          <h5>💬 Ask Your quanBuy</h5>
-          <textarea
-            value={questionText}
-            onChange={(e) => setQuestionText(e.target.value)}
-            placeholder="How do I look? What would you suggest? Is this appropriate for..."
-            rows={3}
-            className="question-input"
+      {showPhotoUpload && (
+        <div className="app-section">
+          <PhotoUpload 
+            onPhotoSelect={handlePhotoSelect}
+            currentPhoto={photo}
           />
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label>Occasion:</label>
-              <select value={occasion} onChange={(e) => setOccasion(e.target.value)}>
-                <option value="">Select occasion</option>
-                <option value="work">Work</option>
-                <option value="casual">Casual</option>
-                <option value="formal">Formal</option>
-                <option value="date">Date</option>
-                <option value="party">Party</option>
-                <option value="travel">Travel</option>
-              </select>
-            </div>
-            
-            <div className="form-group">
-              <label>Budget:</label>
-              <select value={budget} onChange={(e) => setBudget(e.target.value)}>
-                <option value="">Any budget</option>
-                <option value="under-50">Under $50</option>
-                <option value="50-100">$50 - $100</option>
-                <option value="100-200">$100 - $200</option>
-                <option value="200+">$200+</option>
-              </select>
-            </div>
-          </div>
-
-          <button 
-            className="analyze-btn"
-            onClick={handleAnalyze}
-            disabled={!photo || !questionText.trim() || isAnalyzing}
-          >
-            {isAnalyzing ? '🎨 Analyzing...' : '🎨 Get Style Advice'}
-          </button>
         </div>
+      )}
+
+      <div className="app-section">
+        <ShoppingInput 
+          onSearchRequest={handleSearchRequest}
+          isLoading={isSearching}
+        />
       </div>
 
       <div className="app-section">
-        <AnalysisResults 
-          results={analysisResults}
-          isLoading={isAnalyzing}
+        <ProductResults 
+          results={searchResults}
+          isLoading={isSearching}
           onRetry={handleRetry}
         />
       </div>
@@ -165,19 +118,19 @@ window.QuanBuyComponents = {
     }
   },
 
-  mountVoiceInput: (elementId, props = {}) => {
+  mountShoppingInput: (elementId, props = {}) => {
     const container = document.getElementById(elementId);
     if (container) {
       const root = createRoot(container);
-      root.render(<VoiceInput {...props} />);
+      root.render(<ShoppingInput {...props} />);
     }
   },
 
-  mountAnalysisResults: (elementId, props = {}) => {
+  mountProductResults: (elementId, props = {}) => {
     const container = document.getElementById(elementId);
     if (container) {
       const root = createRoot(container);
-      root.render(<AnalysisResults {...props} />);
+      root.render(<ProductResults {...props} />);
     }
   }
 };
@@ -194,11 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.QuanBuyComponents.mountPhotoUpload('photo-upload-react');
   }
   
-  if (document.getElementById('voice-input-react')) {
-    window.QuanBuyComponents.mountVoiceInput('voice-input-react');
+  if (document.getElementById('shopping-input-react')) {
+    window.QuanBuyComponents.mountShoppingInput('shopping-input-react');
   }
   
-  if (document.getElementById('analysis-results-react')) {
-    window.QuanBuyComponents.mountAnalysisResults('analysis-results-react');
+  if (document.getElementById('product-results-react')) {
+    window.QuanBuyComponents.mountProductResults('product-results-react');
   }
 });

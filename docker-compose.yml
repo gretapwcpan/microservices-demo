@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - quanbuy-network
+
+  # Gemini Service (with mock mode for local testing)
+  geminiservice:
+    build:
+      context: ./src/geminiservice
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-mock_mode}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-pro}
+      - GEMINI_API_ENDPOINT=${GEMINI_API_ENDPOINT:-}
+      - GCP_PROJECT_ID=local-test
+      - LOCAL_MODE=true
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    networks:
+      - quanbuy-network
+    volumes:
+      - ./src/geminiservice:/app
+
+  # Frontend Service (simplified for local)
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - GEMINI_SERVICE_URL=http://geminiservice:8080
+    networks:
+      - quanbuy-network
+    volumes:
+      - ./quanbuy.html:/app/static/index.html:ro
+
+  # Simple Python HTTP server for the HTML demo
+  demo-server:
+    image: python:3.11-slim
+    command: python -m http.server 8000
+    ports:
+      - "8000:8000"
+    working_dir: /app
+    volumes:
+      - ./:/app:ro
+    networks:
+      - quanbuy-network
+
+networks:
+  quanbuy-network:
+    driver: bridge

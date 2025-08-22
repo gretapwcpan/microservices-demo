@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: quanbuy
+  labels:
+    name: quanbuy
+    istio-injection: enabled  # Enable if using Istio service mesh

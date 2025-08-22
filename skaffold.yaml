@@ -31,8 +31,8 @@ build:
     context: src/recommendationservice
   - image: shoppingassistantservice
     context: src/shoppingassistantservice
-  - image: aiquanBuyservice
-    context: src/aiquanBuyservice
+  - image: aistylistservice
+    context: src/aistylistservice
   - image: shippingservice
     context: src/shippingservice
   - image: checkoutservice

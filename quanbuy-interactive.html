@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quanBuy - Interactive</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #F5E6D3 0%, #D4A574 40%, #8B5A3C 70%, #704241 100%);
+            background-attachment: fixed;
+            font-family: 'Cinzel', serif;
+            overflow-x: hidden;
+        }
+        
+        /* Artistic floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .orb1 {
+            width: 400px;
+            height: 400px;
+            background: #D4A574;
+            top: -100px;
+            left: -100px;
+        }
+        
+        .orb2 {
+            width: 300px;
+            height: 300px;
+            background: #8B5A3C;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: 5s;
+        }
+        
+        .orb3 {
+            width: 250px;
+            height: 250px;
+            background: #704241;
+            top: 50%;
+            left: 70%;
+            animation-delay: 10s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2rem;
+        }
+        
+        .search-container {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .brand {
+            font-size: 3rem;
+            color: rgba(255, 248, 231, 0.8);
+            letter-spacing: 5px;
+            margin-bottom: 2rem;
+            animation: fadeIn 2s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 2rem 1rem;
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 248, 231, 0.3);
+            color: #FFF8E7;
+            text-align: center;
+            letter-spacing: 2px;
+            transition: all 0.5s ease;
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255, 248, 231, 0.4);
+            font-style: italic;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-bottom-color: rgba(255, 248, 231, 0.6);
+            transform: scale(1.05);
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            color: rgba(255, 248, 231, 0.8);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 248, 231, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* Scroll indicator */
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 248, 231, 0.4);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        
+        /* Products Section */
+        .products {
+            position: relative;
+            z-index: 5;
+            padding: 2rem;
+        }
+        
+        .product {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            opacity: 0;
+            animation: fadeInUp 1s forwards;
+        }
+        
+        .product:nth-child(even) {
+            background: rgba(255, 248, 231, 0.02);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+        }
+        
+        .product-content {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        
+        .product-image {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.3), rgba(139, 90, 60, 0.3));
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-image::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, transparent 30%, rgba(255, 248, 231, 0.1) 70%);
+            animation: rotate 30s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .product-name {
+            font-size: 2rem;
+            color: #FFF8E7;
+            margin-bottom: 0.5rem;
+            letter-spacing: 3px;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            color: rgba(255, 248, 231, 0.7);
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-description {
+            font-size: 1rem;
+            color: rgba(255, 248, 231, 0.6);
+            font-style: italic;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .product-reason {
+            font-size: 0.9rem;
+            color: rgba(255, 248, 231, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        /* Loading State */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 248, 231, 0.3);
+            border-top: 3px solid rgba(255, 248, 231, 0.8);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Status Message */
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: #FFF8E7;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            z-index: 100;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .status-message.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    
+    <div class="loading">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <div class="status-message" id="statusMessage"></div>
+    
+    <section class="hero">
+        <div class="search-container">
+            <h1 class="brand">quanBuy</h1>
+            <input type="text" class="search-input" id="searchInput" placeholder="what do you seek?" autofocus>
+            
+            <div class="action-buttons">
+                <button class="action-btn" onclick="mysterySearch()">✨ Mystery Search</button>
+                <button class="action-btn" onclick="oracleSearch()">🔮 Search by Feeling</button>
+                <button class="action-btn" onclick="getSearchDNA()">🧬 My Search DNA</button>
+                <button class="action-btn" onclick="getDiscoveryStory()">📖 Discovery Story</button>
+            </div>
+        </div>
+        <div class="scroll-hint">scroll to discover</div>
+    </section>
+    
+    <section class="products" id="products">
+        <!-- Products will be dynamically added here -->
+    </section>
+    
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8081';  // Change this for production
+        let searchHistory = [];
+        let productsViewed = [];
+        let sessionStartTime = Date.now();
+        
+        // Utility function to show status messages
+        function showStatus(message, duration = 3000) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.classList.add('show');
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, duration);
+        }
+        
+        // Show/hide loading spinner
+        function setLoading(isLoading) {
+            document.querySelector('.loading').classList.toggle('active', isLoading);
+        }
+        
+        // Mystery Search - AI generates surprising discoveries
+        async function mysterySearch() {
+            setLoading(true);
+            showStatus('🔮 Discovering something special for you...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/mystery-search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'user_' + Math.random().toString(36).substr(2, 9),
+                        search_history: searchHistory,
+                        current_time: new Date().toLocaleTimeString()
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API request failed');
+                
+                const data = await response.json();
+                displayProduct(data);
+                showStatus('✨ Mystery discovered!');
+            } catch (error) {
+                console.error('Mystery search error:', error);
+                showStatus('⚠️ Using offline mode - API not available');
+                // Fallback product
+                displayProduct({
+                    product_name: 'Serendipity Stone',
+                    reason: 'Sometimes the universe chooses for you',
+                    description: 'A moment of unexpected discovery. Let curiosity guide you.',
+                    category: 'mystery',
+                    price_range: '$30-80'
+                });
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // Oracle Search - Search by feeling
+        async function oracleSearch() {
+            const feeling = document.getElementById('searchInput').value || prompt('How are you feeling?');
+            if (!feeling) return;
+            
+            setLoading(true);
+            showStatus('🔮 Translating your emotions...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/oracle-search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'user_' + Math.random().toString(36).substr(2, 9),
+                        feeling: feeling,
+                        context: 'General mood'
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API request failed');
+                
+                const data = await response.json();
+                
+                // Display oracle insight
+                showStatus(data.insight || 'Your emotions guide your discoveries', 5000);
+                
+                // Display products
+                if (data.products && data.products.length > 0) {
+                    data.products.forEach(product => {
+                        displayProduct({
+                            product_name: product.name,
+                            description: product.description,
+                            reason: product.match_reason,
+                            price_range: '$50-200',
+                            category: 'oracle'
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Oracle search error:', error);
+                showStatus('⚠️ Oracle is meditating - try again later');
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // Get Search DNA
+        async function getSearchDNA() {
+            if (searchHistory.length === 0) {
+                showStatus('🧬 Search more to discover your DNA pattern');
+                return;
+            }
+            
+            setLoading(true);
+            showStatus('🧬 Analyzing your search patterns...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/search-dna`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'user_' + Math.random().toString(36).substr(2, 9),
+                        search_history: searchHistory,
+                        timeframe_days: 30
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API request failed');
+                
+                const data = await response.json();
+                
+                // Display DNA results
+                let message = `🧬 Your Search DNA: ${data.personality_type}\n`;
+                message += `Pattern: ${data.pattern}\n`;
+                if (data.insights) {
+                    message += 'Insights: ' + data.insights.join(', ');
+                }
+                showStatus(message, 8000);
+                
+            } catch (error) {
+                console.error('Search DNA error:', error);
+                showStatus('🧬 DNA analysis in progress...');
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // Get Discovery Story
+        async function getDiscoveryStory() {
+            if (searchHistory.length === 0) {
+                showStatus('📖 Start searching to create your story');
+                return;
+            }
+            
+            setLoading(true);
+            showStatus('📖 Writing your discovery story...');
+            
+            const duration = Math.floor((Date.now() - sessionStartTime) / 60000);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/discovery-story`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'user_' + Math.random().toString(36).substr(2, 9),
+                        searches: searchHistory,
+                        products_viewed: productsViewed,
+                        duration_minutes: duration || 5
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API request failed');
+                
+                const data = await response.json();
+                
+                // Display story
+                displayProduct({
+                    product_name: data.title || 'Your Journey',
+                    description: data.story,
+                    reason: `Mood: ${data.mood}`,
+                    price_range: 'Priceless',
+                    category: 'story'
+                });
+                
+                showStatus('📖 Your story has been written');
+            } catch (error) {
+                console.error('Discovery story error:', error);
+                showStatus('📖 Story creation in progress...');
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // Display a product
+        function displayProduct(product) {
+            const productsContainer = document.getElementById('products');
+            
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product';
+            productDiv.innerHTML = `
+                <div class="product-content">
+                    <div class="product-image"></div>
+                    <h2 class="product-name">${product.product_name || product.name}</h2>
+                    <p class="product-price">${product.price_range || 'Price upon request'}</p>
+                    <p class="product-description">${product.description || ''}</p>
+                    <p class="product-reason">${product.reason || ''}</p>
+                </div>
+            `;
+            
+            productsContainer.appendChild(productDiv);
+            
+            // Track viewed products
+            productsViewed.push(product.product_name || product.name);
+            
+            // No auto-scrolling - let user control scrolling
+        }
+        
+        // Handle Enter key in search input
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query) {
+                    // Add to search history
+                    searchHistory.push(query);
+                    
+                    // Check if it's a feeling or regular search
+                    const feelings = ['happy', 'sad', 'anxious', 'excited', 'calm', 'stressed', 'peaceful', 'energetic'];
+                    if (feelings.some(feeling => query.toLowerCase().includes(feeling))) {
+                        oracleSearch();
+                    } else {
+                        mysterySearch();
+                    }
+                }
+            }
+        });
+        
+        // Initialize with a welcome message
+        window.addEventListener('load', () => {
+            showStatus('✨ Welcome to quanBuy - Your mindful marketplace', 5000);
+            // Removed auto-display of welcome product to prevent scrolling
+        });
+        
+        // Infinite scroll functionality
+        let isLoading = false;
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                if (!isLoading && searchHistory.length > 0) {
+                    isLoading = true;
+                    // Trigger a mystery search when scrolling to bottom
+                    mysterySearch().finally(() => {
+                        isLoading = false;
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

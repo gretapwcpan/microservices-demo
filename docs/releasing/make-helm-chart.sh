@@ -29,8 +29,8 @@ cd ${REPO_ROOT}/helm-chart
 gsed -i "s/^appVersion:.*/appVersion: \"${TAG}\"/" Chart.yaml
 gsed -i "s/^version:.*/version: ${TAG:1}/" Chart.yaml
 helm package .
-helm push onlineboutique-${TAG:1}.tgz oci://$HELM_CHART_REPO
+helm push quanbuy-${TAG:1}.tgz oci://$HELM_CHART_REPO
 
-rm ./onlineboutique-${TAG:1}.tgz
+rm ./quanbuy-${TAG:1}.tgz
 
 log "Successfully built and pushed the Helm chart."

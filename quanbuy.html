@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quanBuy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: radial-gradient(ellipse at center, #F5E6D3 0%, #D4A574 40%, #8B5A3C 70%, #704241 100%);
+            background-attachment: fixed;
+            font-family: 'Cinzel', serif;
+            overflow-x: hidden;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Artistic floating orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .orb1 {
+            width: 400px;
+            height: 400px;
+            background: #D4A574;
+            top: -100px;
+            left: -100px;
+        }
+        
+        .orb2 {
+            width: 300px;
+            height: 300px;
+            background: #8B5A3C;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: 5s;
+        }
+        
+        .orb3 {
+            width: 250px;
+            height: 250px;
+            background: #704241;
+            top: 50%;
+            left: 70%;
+            animation-delay: 10s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .search-container {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .brand {
+            font-size: 3rem;
+            color: rgba(255, 248, 231, 0.8);
+            letter-spacing: 5px;
+            margin-bottom: 2rem;
+            animation: fadeIn 2s ease-in;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 2rem 1rem;
+            font-size: 1.8rem;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 248, 231, 0.3);
+            color: #FFF8E7;
+            text-align: center;
+            letter-spacing: 2px;
+            transition: all 0.5s ease;
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255, 248, 231, 0.4);
+            font-style: italic;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-bottom-color: rgba(255, 248, 231, 0.6);
+            transform: scale(1.05);
+        }
+        
+        /* Scroll indicator */
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 248, 231, 0.4);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        
+        /* Infinite scroll products */
+        .products {
+            position: relative;
+            z-index: 5;
+        }
+        
+        .product {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            opacity: 0;
+            animation: fadeInUp 1s forwards;
+        }
+        
+        .product:nth-child(even) {
+            background: rgba(255, 248, 231, 0.02);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+        }
+        
+        .product-content {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        
+        .product-image {
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.3), rgba(139, 90, 60, 0.3));
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-image::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, transparent 30%, rgba(255, 248, 231, 0.1) 70%);
+            animation: rotate 30s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .product-name {
+            font-size: 2rem;
+            color: #FFF8E7;
+            margin-bottom: 0.5rem;
+            letter-spacing: 3px;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            color: rgba(255, 248, 231, 0.7);
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-store {
+            font-size: 1rem;
+            color: rgba(255, 248, 231, 0.5);
+            font-style: italic;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    
+    <section class="hero">
+        <div class="search-container">
+            <h1 class="brand">quanBuy</h1>
+            <input type="text" class="search-input" placeholder="what do you seek?" autofocus>
+        </div>
+        <div class="scroll-hint">scroll to discover</div>
+    </section>
+    
+    <section class="products" id="products">
+        <div class="product">
+            <div class="product-content">
+                <div class="product-image"></div>
+                <h2 class="product-name">Ethereal Silk</h2>
+                <p class="product-price">$189</p>
+                <p class="product-store">artisan dreams</p>
+            </div>
+        </div>
+        
+        <div class="product">
+            <div class="product-content">
+                <div class="product-image" style="background: linear-gradient(135deg, rgba(139, 90, 60, 0.3), rgba(112, 66, 65, 0.3));"></div>
+                <h2 class="product-name">Moonstone Ring</h2>
+                <p class="product-price">$349</p>
+                <p class="product-store">celestial crafts</p>
+            </div>
+        </div>
+        
+        <div class="product">
+            <div class="product-content">
+                <div class="product-image" style="background: linear-gradient(135deg, rgba(245, 230, 211, 0.3), rgba(212, 165, 116, 0.3));"></div>
+                <h2 class="product-name">Desert Rose</h2>
+                <p class="product-price">$89</p>
+                <p class="product-store">nomad collective</p>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        // Infinite scroll
+        let productCount = 3;
+        const products = [
+            { name: 'Woven Dreams', price: '$129', store: 'textile tales' },
+            { name: 'Earth Vessel', price: '$79', store: 'clay studio' },
+            { name: 'Crystal Prism', price: '$299', store: 'light works' },
+            { name: 'Sage Bundle', price: '$39', store: 'herb garden' },
+            { name: 'Copper Bowl', price: '$159', store: 'metal arts' }
+        ];
+        
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+                addProduct();
+            }
+        });
+        
+        function addProduct() {
+            const container = document.getElementById('products');
+            const product = products[productCount % products.length];
+            
+            const div = document.createElement('div');
+            div.className = 'product';
+            div.innerHTML = `
+                <div class="product-content">
+                    <div class="product-image"></div>
+                    <h2 class="product-name">${product.name}</h2>
+                    <p class="product-price">${product.price}</p>
+                    <p class="product-store">${product.store}</p>
+                </div>
+            `;
+            
+            container.appendChild(div);
+            productCount++;
+            
+            // Trigger animation
+            setTimeout(() => {
+                div.style.animation = 'fadeInUp 1s forwards';
+            }, 10);
+        }
+    </script>
+</body>
+</html>

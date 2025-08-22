@@ -6,20 +6,20 @@ If you'd like to deploy Online Boutique via its Helm chart, you could leverage t
 
 Deploy the default setup of Online Boutique:
 ```sh
-helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
+helm upgrade quanbuy oci://us-docker.pkg.dev/online-boutique-ci/charts/quanbuy \
     --install
 ```
 
 Deploy advanced scenario of Online Boutique:
 ```sh
-helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/onlineboutique \
+helm upgrade quanbuy oci://us-docker.pkg.dev/online-boutique-ci/charts/quanbuy \
     --install \
     --create-namespace \
     --set images.repository=us-docker.pkg.dev/my-project/microservices-demo \
     --set frontend.externalService=false \
     --set redis.create=false \
     --set cartservice.database.type=spanner \
-    --set cartservice.database.connectionString=projects/my-project/instances/onlineboutique/databases/carts \
+    --set cartservice.database.connectionString=projects/my-project/instances/quanbuy/databases/carts \
     --set serviceAccounts.create=true \
     --set authorizationPolicies.create=true \
     --set networkPolicies.create=true \
@@ -27,7 +27,7 @@ helm upgrade onlineboutique oci://us-docker.pkg.dev/online-boutique-ci/charts/on
     --set frontend.virtualService.create=true \
     --set 'serviceAccounts.annotations.iam\.gke\.io/gcp-service-account=spanner-db-user@my-project.iam.gserviceaccount.com' \
     --set serviceAccounts.annotationsOnlyForCartservice=true \
-    -n onlineboutique
+    -n quanbuy
 ```
 
 For the full list of configurations, see [values.yaml](./values.yaml).

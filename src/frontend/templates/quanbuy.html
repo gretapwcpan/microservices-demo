@@ -1,0 +1,555 @@
+<!--
+ Copyright 2024 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+{{ define "quanbuy" }}
+
+{{ template "header" . }}
+
+<!-- React and Babel -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+/* Modern, bright, cheerful design system */
+:root {
+    --primary: #667eea;
+    --secondary: #764ba2;
+    --accent: #f093fb;
+    --success: #4facfe;
+    --warning: #fa709a;
+    --danger: #f5576c;
+    --light: #ffffff;
+    --dark: #2d3748;
+    --gray: #718096;
+    --border-radius: 16px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.quanbuy-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.hero-section {
+    text-align: center;
+    padding: 3rem 0;
+    color: white;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #fff, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient 3s ease infinite;
+}
+
+@keyframes gradient {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.9; }
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    opacity: 0.95;
+    margin-bottom: 3rem;
+}
+
+.search-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.search-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.tab-button {
+    padding: 1rem 2rem;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #718096;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.tab-button.active {
+    color: var(--primary);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 3px 3px 0 0;
+}
+
+.search-input-group {
+    margin-bottom: 2rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 1.25rem;
+    font-size: 1.1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    background: white;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.upload-area {
+    border: 3px dashed #cbd5e0;
+    border-radius: var(--border-radius);
+    padding: 3rem;
+    text-align: center;
+    transition: var(--transition);
+    cursor: pointer;
+    background: #f7fafc;
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background: #edf2f7;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.filters-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.filter-select {
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.search-button {
+    width: 100%;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.search-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.search-button:disabled {
+    background: linear-gradient(135deg, #cbd5e0, #a0aec0);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.results-section {
+    margin-top: 3rem;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.product-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.product-info {
+    padding: 1.5rem;
+}
+
+.product-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.product-store {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem;
+    color: var(--gray);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 1.2rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .search-card {
+        padding: 1.5rem;
+    }
+    
+    .filters-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+</style>
+
+<div class="animated-bg"></div>
+
+<div class="quanbuy-container">
+    <div id="quanbuy-app"></div>
+</div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+const QuanBuyApp = () => {
+    const [activeTab, setActiveTab] = useState('text');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [category, setCategory] = useState('all');
+    const [priceRange, setPriceRange] = useState('all');
+    const [sortBy, setSortBy] = useState('relevance');
+    const [isLoading, setIsLoading] = useState(false);
+    const [results, setResults] = useState([]);
+
+    const handleSearch = async () => {
+        setIsLoading(true);
+        // Simulate API call
+        setTimeout(() => {
+            setResults([
+                {
+                    id: 1,
+                    title: "Stylish Sneakers",
+                    price: "$89.99",
+                    store: "Fashion Store",
+                    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23f093fb' width='200' height='200'/%3E%3C/svg%3E"
+                },
+                {
+                    id: 2,
+                    title: "Designer Bag",
+                    price: "$249.99",
+                    store: "Luxury Boutique",
+                    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%234facfe' width='200' height='200'/%3E%3C/svg%3E"
+                },
+                {
+                    id: 3,
+                    title: "Smart Watch",
+                    price: "$399.99",
+                    store: "Tech Hub",
+                    image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23fa709a' width='200' height='200'/%3E%3C/svg%3E"
+                }
+            ]);
+            setIsLoading(false);
+        }, 1500);
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    return (
+        <div>
+            <div className="hero-section">
+                <h1 className="hero-title">🛍️ quanBuy</h1>
+                <p className="hero-subtitle">Find any product across multiple stores with AI-powered search</p>
+            </div>
+
+            <div className="search-card fade-in">
+                <div className="search-tabs">
+                    <button 
+                        className={`tab-button ${activeTab === 'text' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('text')}
+                    >
+                        📝 Text Search
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'image' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('image')}
+                    >
+                        📷 Image Search
+                    </button>
+                </div>
+
+                {activeTab === 'text' ? (
+                    <div className="search-input-group">
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Describe what you're looking for..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        />
+                    </div>
+                ) : (
+                    <div className="upload-area" onClick={() => document.getElementById('file-input').click()}>
+                        <input
+                            id="file-input"
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleImageUpload}
+                        />
+                        <div className="upload-icon">📸</div>
+                        <p>{selectedImage ? 'Image selected! Click to change' : 'Click to upload an image or drag & drop'}</p>
+                    </div>
+                )}
+
+                <div className="filters-section">
+                    <div className="filter-group">
+                        <label className="filter-label">Category</label>
+                        <select className="filter-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+                            <option value="all">All Categories</option>
+                            <option value="fashion">Fashion</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="home">Home & Garden</option>
+                            <option value="sports">Sports</option>
+                        </select>
+                    </div>
+                    <div className="filter-group">
+                        <label className="filter-label">Price Range</label>
+                        <select className="filter-select" value={priceRange} onChange={(e) => setPriceRange(e.target.value)}>
+                            <option value="all">All Prices</option>
+                            <option value="0-50">Under $50</option>
+                            <option value="50-100">$50 - $100</option>
+                            <option value="100-500">$100 - $500</option>
+                            <option value="500+">Over $500</option>
+                        </select>
+                    </div>
+                    <div className="filter-group">
+                        <label className="filter-label">Sort By</label>
+                        <select className="filter-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                            <option value="relevance">Relevance</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="rating">Best Rated</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button 
+                    className="search-button pulse"
+                    onClick={handleSearch}
+                    disabled={isLoading || (!searchQuery && !selectedImage)}
+                >
+                    {isLoading ? 'Searching...' : '🔍 Search Products'}
+                </button>
+            </div>
+
+            {isLoading && (
+                <div style={{ textAlign: 'center' }}>
+                    <div className="loading-spinner"></div>
+                </div>
+            )}
+
+            {!isLoading && results.length > 0 && (
+                <div className="results-section">
+                    <h2 style={{ color: 'white', marginBottom: '2rem' }}>Found {results.length} products</h2>
+                    <div className="results-grid">
+                        {results.map(product => (
+                            <div key={product.id} className="product-card fade-in">
+                                <img src={product.image} alt={product.title} className="product-image" />
+                                <div className="product-info">
+                                    <h3 className="product-title">{product.title}</h3>
+                                    <div className="product-price">{product.price}</div>
+                                    <div className="product-store">📍 {product.store}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {!isLoading && results.length === 0 && searchQuery && (
+                <div className="search-card empty-state">
+                    <div className="empty-state-icon">🔍</div>
+                    <div className="empty-state-text">
+                        Start searching to find amazing products!
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// Render the app
+ReactDOM.render(<QuanBuyApp />, document.getElementById('quanbuy-app'));
+</script>
+
+{{ template "footer" . }}
+{{ end }}

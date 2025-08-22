@@ -11,7 +11,7 @@ To provision a Spanner instance you can follow the following instructions:
 gcloud services enable spanner.googleapis.com
 
 SPANNER_REGION_CONFIG="<your-spanner-region-config-name>" # e.g. "regional-us-east5"
-SPANNER_INSTANCE_NAME=onlineboutique
+SPANNER_INSTANCE_NAME=quanbuy
 
 gcloud spanner instances create ${SPANNER_INSTANCE_NAME} \
     --description="online boutique shopping cart" \
@@ -42,7 +42,7 @@ As a good practice, let's create a dedicated least privilege Google Service Acco
 PROJECT_ID=<your-project-id>
 SPANNER_DB_USER_GSA_NAME=spanner-db-user-sa
 SPANNER_DB_USER_GSA_ID=${SPANNER_DB_USER_GSA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
-ONLINEBOUTIQUE_NAMESPACE=default
+quanbuy_NAMESPACE=default
 CARTSERVICE_KSA_NAME=cartservice
 
 gcloud iam service-accounts create ${SPANNER_DB_USER_GSA_NAME} \
@@ -53,7 +53,7 @@ gcloud spanner databases add-iam-policy-binding ${SPANNER_DATABASE_NAME} \
     --role roles/spanner.databaseUser
 
 gcloud iam service-accounts add-iam-policy-binding ${SPANNER_DB_USER_GSA_ID} \
-    --member "serviceAccount:${PROJECT_ID}.svc.id.goog[${ONLINEBOUTIQUE_NAMESPACE}/${CARTSERVICE_KSA_NAME}]" \
+    --member "serviceAccount:${PROJECT_ID}.svc.id.goog[${quanbuy_NAMESPACE}/${CARTSERVICE_KSA_NAME}]" \
     --role roles/iam.workloadIdentityUser
 ```
 
@@ -95,7 +95,7 @@ You can locally render these manifests by running `kubectl kustomize .` as well 
 
 The following environment variables will be used by the `cartservice`, if present:
 
-- `SPANNER_INSTANCE`: defaults to `onlineboutique`, unless specified.
+- `SPANNER_INSTANCE`: defaults to `quanbuy`, unless specified.
 - `SPANNER_DATABASE`: defaults to `carts`, unless specified.
 - `SPANNER_CONNECTION_STRING`: defaults to `projects/${SPANNER_PROJECT}/instances/${SPANNER_INSTANCE}/databases/${SPANNER_DATABASE}`. If this variable is defined explicitly, all other environment variables will be ignored.
 

@@ -19,9 +19,9 @@ PROJECT_ID=<project_id>
 REGION=<region>
 USE_GKE_GCLOUD_AUTH_PLUGIN=True
 ALLOYDB_NETWORK=default
-ALLOYDB_SERVICE_NAME=onlineboutique-network-range
-ALLOYDB_CLUSTER_NAME=onlineboutique-cluster
-ALLOYDB_INSTANCE_NAME=onlineboutique-instance
+ALLOYDB_SERVICE_NAME=quanbuy-network-range
+ALLOYDB_CLUSTER_NAME=quanbuy-cluster
+ALLOYDB_INSTANCE_NAME=quanbuy-instance
 
 # **Note:** Primary and Read IP will need to be set after you create the instance. The command to set this in the shell is included below, but it would also be a good idea to run the command, and manually set the IP address in the .bashrc
 ALLOYDB_PRIMARY_IP=<ip set below after instance created>

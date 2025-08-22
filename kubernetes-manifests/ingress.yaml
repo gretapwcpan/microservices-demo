@@ -1,0 +1,92 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: quanbuy-ingress
+  namespace: quanbuy
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "quanbuy-ip"  # Reserve a static IP first
+    networking.gke.io/managed-certificates: "quanbuy-cert"
+    kubernetes.io/ingress.allow-http: "false"  # Force HTTPS
+    # Cloud Armor policy for DDoS protection
+    cloud.google.com/armor-config: '{"rule": "quanbuy-security-policy"}'
+    # Backend configuration
+    cloud.google.com/backend-config: '{"default": "quanbuy-backend-config"}'
+spec:
+  rules:
+  - host: quanbuy.example.com  # Replace with your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+      - path: /api/gemini
+        pathType: Prefix
+        backend:
+          service:
+            name: geminiservice
+            port:
+              number: 8080
+      - path: /api/social
+        pathType: Prefix
+        backend:
+          service:
+            name: socialservice
+            port:
+              number: 8080
+      - path: /api/gamification
+        pathType: Prefix
+        backend:
+          service:
+            name: gamificationservice
+            port:
+              number: 8080
+---
+# Managed Certificate for HTTPS
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: quanbuy-cert
+  namespace: quanbuy
+spec:
+  domains:
+    - quanbuy.example.com  # Replace with your domain
+    - www.quanbuy.example.com
+---
+# Backend configuration for health checks and CDN
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: quanbuy-backend-config
+  namespace: quanbuy
+spec:
+  cdn:
+    enabled: true
+    cachePolicy:
+      includeHost: true
+      includeProtocol: true
+      includeQueryString: false
+    negativeCaching: true
+    negativeCachingPolicy:
+    - code: 404
+      ttl: 120
+    - code: 410
+      ttl: 120
+  healthCheck:
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 2
+    unhealthyThreshold: 3
+    type: HTTP
+    requestPath: /health
+    port: 80
+  sessionAffinity:
+    affinityType: "CLIENT_IP"
+    affinityCookieTtlSec: 3600
+  timeoutSec: 30
+  connectionDraining:
+    drainingTimeoutSec: 30

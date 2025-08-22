@@ -634,9 +634,9 @@ func stringinSlice(slice []string, val string) bool {
 	return false
 }
 
-// AI Stylist Handlers
+// AI quanBuy Search Handlers
 
-func (fe *frontendServer) aiStylistHandler(w http.ResponseWriter, r *http.Request) {
+func (fe *frontendServer) aiQuanBuyHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 
 	if err := templates.ExecuteTemplate(w, "ai_quanBuy", injectCommonTemplateData(r, map[string]interface{}{
@@ -647,11 +647,11 @@ func (fe *frontendServer) aiStylistHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (fe *frontendServer) analyzeStyleHandler(w http.ResponseWriter, r *http.Request) {
+func (fe *frontendServer) searchProductsHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	
-	// Proxy request to AI Stylist Service
-	url := "http://" + fe.aiStylistSvcAddr + "/analyze-style"
+	// Proxy request to AI quanBuy Service
+	url := "http://" + fe.aiStylistSvcAddr + "/search-products"
 	req, err := http.NewRequest(http.MethodPost, url, r.Body)
 	if err != nil {
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to create request"), http.StatusInternalServerError)

@@ -1,25 +1,28 @@
 .photo-upload-container {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .photo-upload-area {
-  border: 2px dashed #e2e8f0;
-  border-radius: 12px;
-  padding: 2rem;
+  border: 3px dashed #667eea;
+  border-radius: 20px;
+  padding: 2.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #f8fafc;
-  min-height: 200px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+  min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 }
 
 .photo-upload-area:hover {
-  border-color: #3b82f6;
-  background: #eff6ff;
+  border-color: #ff6b6b;
+  background: linear-gradient(145deg, #ffffff 0%, #fff1f1 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
 }
 
 .photo-upload-area.drag-over {

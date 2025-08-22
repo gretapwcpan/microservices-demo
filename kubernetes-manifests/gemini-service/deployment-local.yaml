@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geminiservice
+  namespace: quanbuy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: geminiservice
+  template:
+    metadata:
+      labels:
+        app: geminiservice
+    spec:
+      containers:
+      - name: server
+        image: geminiservice:latest
+        imagePullPolicy: Never  # Use local image
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: PORT
+          value: "8080"
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: api-key
+        - name: GEMINI_MODEL
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: model
+        - name: GEMINI_API_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: endpoint
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: LOCAL_MODE
+          value: "true"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
