@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quanBuy - Visual Shopping</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #F5E6D3 0%, #D4A574 40%, #8B5A3C 70%, #704241 100%);
+            background-attachment: fixed;
+            font-family: 'Cinzel', serif;
+            color: #FFF8E7;
+        }
+        
+        .header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .brand {
+            font-size: 2.5rem;
+            color: rgba(255, 248, 231, 0.9);
+            letter-spacing: 5px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .search-wrapper {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1.2rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 30px;
+            color: #FFF8E7;
+        }
+        
+        .search-btn {
+            padding: 1rem 2rem;
+            background: rgba(255, 248, 231, 0.2);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 30px;
+            color: rgba(255, 248, 231, 0.9);
+            cursor: pointer;
+        }
+        
+        .search-btn:hover {
+            background: rgba(255, 248, 231, 0.3);
+        }
+        
+        .quick-tags {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248, 231, 0.2);
+            border-radius: 20px;
+            color: rgba(255, 248, 231, 0.8);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .tag:hover {
+            background: rgba(255, 248, 231, 0.2);
+        }
+        
+        .results-info {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255, 248, 231, 0.7);
+            font-size: 1.1rem;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .product-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            background: rgba(255, 248, 231, 0.1);
+        }
+        
+        .product-info {
+            padding: 1.5rem;
+        }
+        
+        .product-name {
+            font-size: 1.2rem;
+            color: rgba(255, 248, 231, 0.9);
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            color: #D4A574;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-description {
+            font-size: 0.9rem;
+            color: rgba(255, 248, 231, 0.6);
+            line-height: 1.4;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 248, 231, 0.3);
+            border-top: 3px solid rgba(255, 248, 231, 0.8);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1 class="brand">quanBuy</h1>
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="searchInput" placeholder="What are you looking for?" autofocus>
+                <button class="search-btn" onclick="searchProducts()">Search</button>
+            </div>
+            <div class="quick-tags">
+                <span class="tag" onclick="quickSearch('jeans')">jeans</span>
+                <span class="tag" onclick="quickSearch('blue jeans')">blue jeans</span>
+                <span class="tag" onclick="quickSearch('vintage dress')">vintage dress</span>
+                <span class="tag" onclick="quickSearch('leather jacket')">leather jacket</span>
+                <span class="tag" onclick="quickSearch('sneakers')">sneakers</span>
+            </div>
+        </div>
+    </header>
+    
+    <div class="results-info" id="resultsInfo"></div>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem; color: rgba(255, 248, 231, 0.7);">Discovering products...</p>
+    </div>
+    
+    <div class="products-grid" id="productsGrid"></div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+        
+        async function searchProducts(query = null) {
+            const searchQuery = query || document.getElementById('searchInput').value;
+            if (!searchQuery) return;
+            
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('productsGrid').innerHTML = '';
+            document.getElementById('resultsInfo').textContent = '';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/product-search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: searchQuery,
+                        max_results: 12
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Search failed');
+                
+                const data = await response.json();
+                displayProducts(data);
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                // Fallback with demo products
+                displayFallbackProducts(searchQuery);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+        
+        function displayProducts(data) {
+            const grid = document.getElementById('productsGrid');
+            const info = document.getElementById('resultsInfo');
+            
+            // Update results info
+            const specificity = data.specificity;
+            const resultText = specificity === 'broad' ? 'Exploring variety' : 
+                               specificity === 'refined' ? 'Refined selection' : 
+                               'Precise matches';
+            info.textContent = `${data.total_results} ${resultText} for "${data.query}"`;
+            
+            // Display products
+            data.products.forEach((product, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                // Use Picsum for reliable images with unique seeds
+                const imageUrl = `https://picsum.photos/400/600?random=${Date.now()}${index}`;
+                card.innerHTML = `
+                    <img src="${imageUrl}" 
+                         alt="${product.name}" class="product-image"
+                         loading="lazy">
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-price">${product.price}</p>
+                        <p class="product-description">${product.description}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        function displayFallbackProducts(query) {
+            const grid = document.getElementById('productsGrid');
+            const info = document.getElementById('resultsInfo');
+            
+            info.textContent = `Showing results for "${query}"`;
+            
+            // Generate fallback products with Picsum for reliable images
+            for (let i = 1; i <= 8; i++) {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                // Use Picsum for reliable placeholder images
+                const imageUrl = `https://picsum.photos/400/600?random=${Date.now()}${i}`;
+                card.innerHTML = `
+                    <img src="${imageUrl}" 
+                         alt="${query}" class="product-image"
+                         loading="lazy">
+                    <div class="product-info">
+                        <h3 class="product-name">${query} Style ${i}</h3>
+                        <p class="product-price">$${49 + i * 10}.99</p>
+                        <p class="product-description">Premium quality ${query}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+        
+        function quickSearch(query) {
+            document.getElementById('searchInput').value = query;
+            searchProducts(query);
+        }
+        
+        // Handle Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+        
+        // Initial welcome message
+        window.addEventListener('load', () => {
+            document.getElementById('resultsInfo').textContent = 'Start your visual shopping journey';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quanBuy - Visual Shopping</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #F5E6D3 0%, #D4A574 40%, #8B5A3C 70%, #704241 100%);
+            background-attachment: fixed;
+            font-family: 'Cinzel', serif;
+            color: #FFF8E7;
+        }
+        
+        /* Header */
+        .header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .brand {
+            font-size: 2.5rem;
+            color: rgba(255, 248, 231, 0.9);
+            letter-spacing: 5px;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Search Container */
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .search-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 30px;
+            color: #FFF8E7;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255, 248, 231, 0.5);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 248, 231, 0.15);
+            border-color: rgba(255, 248, 231, 0.5);
+        }
+        
+        .search-btn {
+            padding: 1rem 2rem;
+            background: rgba(255, 248, 231, 0.2);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 30px;
+            color: rgba(255, 248, 231, 0.9);
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: rgba(255, 248, 231, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Quick Search Tags */
+        .quick-tags {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248,

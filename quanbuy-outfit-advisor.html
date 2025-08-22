@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quanBuy - AI Outfit Advisor & Magic Mirror</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #F5E6D3 0%, #D4A574 40%, #8B5A3C 70%, #704241 100%);
+            background-attachment: fixed;
+            font-family: 'Cinzel', serif;
+            color: #FFF8E7;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .brand {
+            font-size: 3rem;
+            color: rgba(255, 248, 231, 0.9);
+            letter-spacing: 5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 248, 231, 0.7);
+            letter-spacing: 2px;
+        }
+        
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .mode-btn {
+            padding: 1rem 2rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 2px solid rgba(255, 248, 231, 0.3);
+            border-radius: 30px;
+            color: rgba(255, 248, 231, 0.8);
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active {
+            background: rgba(255, 248, 231, 0.3);
+            border-color: rgba(255, 248, 231, 0.6);
+            transform: scale(1.05);
+        }
+        
+        .mode-btn:hover {
+            background: rgba(255, 248, 231, 0.2);
+        }
+        
+        /* Mode Sections */
+        .mode-section {
+            display: none;
+        }
+        
+        .mode-section.active {
+            display: block;
+        }
+        
+        /* Outfit Advisor Section */
+        .outfit-form {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 248, 231, 0.8);
+            font-size: 1.1rem;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 10px;
+            color: #FFF8E7;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: rgba(255, 248, 231, 0.4);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #D4A574, #8B5A3C);
+            border: none;
+            border-radius: 30px;
+            color: #FFF8E7;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Magic Mirror Section */
+        .mirror-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .upload-area {
+            border: 2px dashed rgba(255, 248, 231, 0.3);
+            border-radius: 15px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: rgba(255, 248, 231, 0.5);
+            background: rgba(255, 248, 231, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            color: rgba(255, 248, 231, 0.7);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Results Section */
+        .results {
+            margin-top: 3rem;
+        }
+        
+        .analysis-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .analysis-title {
+            font-size: 1.5rem;
+            color: #D4A574;
+            margin-bottom: 1rem;
+        }
+        
+        .analysis-content {
+            color: rgba(255, 248, 231, 0.8);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .color-palette {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .color-swatch {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 248, 231, 0.3);
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .product-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: rgba(255, 248, 231, 0.1);
+        }
+        
+        .product-info {
+            padding: 1rem;
+        }
+        
+        .product-name {
+            font-size: 1.1rem;
+            color: rgba(255, 248, 231, 0.9);
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-price {
+            font-size: 1.3rem;
+            color: #D4A574;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-description {
+            font-size: 0.9rem;
+            color: rgba(255, 248, 231, 0.6);
+        }
+        
+        .rating {
+            font-size: 1.8rem;
+            color: #D4A574;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .suggestions-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .suggestion-item {
+            padding: 0.8rem;
+            background: rgba(255, 248, 231, 0.05);
+            border-left: 3px solid #D4A574;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 248, 231, 0.8);
+        }
+        
+        .compliment {
+            font-size: 1.3rem;
+            color: rgba(255, 248, 231, 0.9);
+            text-align: center;
+            font-style: italic;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(212, 165, 116, 0.1);
+            border-radius: 15px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 248, 231, 0.3);
+            border-top: 3px solid rgba(255, 248, 231, 0.8);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="brand">quanBuy</h1>
+            <p class="subtitle">AI Outfit Advisor & Magic Mirror</p>
+        </header>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="switchMode('advisor')">
+                👗 Outfit Advisor
+            </button>
+            <button class="mode-btn" onclick="switchMode('mirror')">
+                🪞 Magic Mirror
+            </button>
+        </div>
+        
+        <!-- Outfit Advisor Section -->
+        <div id="advisor-section" class="mode-section active">
+            <div class="outfit-form">
+                <div class="form-group">
+                    <label class="form-label">What are you wearing today?</label>
+                    <textarea class="form-textarea" id="outfitDescription" 
+                        placeholder="Describe your outfit... e.g., 'I'm wearing a black midi dress with white sneakers and a denim jacket'"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Occasion (optional)</label>
+                    <select class="form-select" id="occasion">
+                        <option value="">Select occasion...</option>
+                        <option value="work">Work/Office</option>
+                        <option value="casual">Casual Day Out</option>
+                        <option value="date">Date Night</option>
+                        <option value="party">Party/Event</option>
+                        <option value="formal">Formal Event</option>
+                        <option value="travel">Travel</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Style Preference (optional)</label>
+                    <select class="form-select" id="stylePreference">
+                        <option value="">Select style...</option>
+                        <option value="minimalist">Minimalist</option>
+                        <option value="elegant">Elegant</option>
+                        <option value="edgy">Edgy</option>
+                        <option value="bohemian">Bohemian</option>
+                        <option value="classic">Classic</option>
+                        <option value="trendy">Trendy</option>
+                    </select>
+                </div>
+                
+                <button class="submit-btn" onclick="getOutfitAdvice()">
+                    Get AI Style Recommendations
+                </button>
+            </div>
+        </div>
+        
+        <!-- Magic Mirror Section -->
+        <div id="mirror-section" class="mode-section">
+            <div class="mirror-container">
+                <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+                    <div class="upload-icon">📸</div>
+                    <p class="upload-text">Click to upload your outfit photo</p>
+                    <p style="color: rgba(255, 248, 231, 0.5); font-size: 0.9rem;">
+                        or describe your outfit below
+                    </p>
+                </div>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                
+                <div class="form-group">
+                    <textarea class="form-textarea" id="mirrorDescription" 
+                        placeholder="Describe your complete outfit for the magic mirror..."></textarea>
+                </div>
+                
+                <button class="submit-btn" onclick="analyzeMirror()">
+                    ✨ Analyze My Style
+                </button>
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem; color: rgba(255, 248, 231, 0.7);">AI is analyzing your style...</p>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results" id="results"></div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+        
+        function switchMode(mode) {
+            // Update buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.mode-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (mode === 'advisor') {
+                document.getElementById('advisor-section').classList.add('active');
+            } else {
+                document.getElementById('mirror-section').classList.add('active');
+            }
+            
+            // Clear results
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function getOutfitAdvice() {
+            const description = document.getElementById('outfitDescription').value;
+            if (!description) {
+                alert('Please describe your outfit first!');
+                return;
+            }
+            
+            const occasion = document.getElementById('occasion').value;
+            const style = document.getElementById('stylePreference').value;
+            
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/outfit-advisor`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_prompt: description,
+                        occasion: occasion || null,
+                        style_preference: style || null
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to get advice');
+                
+                const data = await response.json();
+                displayOutfitResults(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                displayFallbackOutfitResults();
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+        
+        async function analyzeMirror() {
+            const description = document.getElementById('mirrorDescription').value;
+            if (!description) {
+                alert('Please describe your outfit or upload a photo!');
+                return;
+            }
+            
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/magic-mirror`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image_description: description
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to analyze');
+                
+                const data = await response.json();
+                displayMirrorResults(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                displayFallbackMirrorResults();
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+        
+        function displayOutfitResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = `
+                <div class="analysis-card">
+                    <h2 class="analysis-title">✨ Outfit Analysis</h2>
+                    <p class="analysis-content">${data.outfit_analysis}</p>
+                    
+                    <h3 class="analysis-title">Style Tips</h3>
+                    <p class="analysis-content">${data.style_tips}</p>
+                    
+                    <h3 class="analysis-title">Color Palette</h3>
+                    <div class="color-palette">
+                        ${data.color_palette.map(color => {
+                            const colorMap = {
+                                'black': '#000000',
+                                'white': '#FFFFFF',
+                                'gold': '#FFD700',
+                                'nude': '#F5DEB3',
+                                'neutral': '#B8B8B8',
+                                'earth': '#8B4513',
+                                'accent': '#D4A574'
+                            };
+                            return `<div class="color-swatch" style="background: ${colorMap[color] || '#D4A574'}" title="${color}"></div>`;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <div class="analysis-card">
+                    <h2 class="analysis-title">🛍️ Recommended Items</h2>
+                    <div class="products-grid">
+                        ${data.recommended_items.map(item => `
+                            <div class="product-card">
+                                <img src="${item.image_url || `https://picsum.photos/400/600?random=${Math.random()}`}" 
+                                     alt="${item.name}" class="product-image">
+                                <div class="product-info">
+                                    <h3 class="product-name">${item.name}</h3>
+                                    <p class="product-price">${item.price}</p>
+                                    <p class="product-description">${item.description}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function displayMirrorResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = `
+                <div class="compliment">${data.compliment}</div>
+                
+                <div class="analysis-card">
+                    <h2 class="analysis-title">🪞 Style Analysis</h2>
+                    <p class="analysis-content">${data.style_analysis}</p>
+                    <div class="rating">${data.outfit_rating}</div>
+                </div>
+                
+                <div class="analysis-card">
+                    <h2 class="analysis-title">💡 Style Suggestions</h2>
+                    <ul class="suggestions-list">
+                        ${data.suggestions.map(suggestion => 
+                            `<li class="suggestion-item">${suggestion}</li>`
+                        ).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            if (data.recommended_products && data.recommended_products.length > 0) {
+                html += `
+                    <div class="analysis-card">
+                        <h2 class="analysis-title">✨ Enhance Your Look</h2>
+                        <div class="products-grid">
+                            ${data.recommended_products.map(item => `
+                                <div class="product-card">
+                                    <img src="${item.image_url || `https://picsum.photos/400/600?random=${Math.random()}`}" 
+                                         alt="${item.name}" class="product-image">
+                                    <div class="product-info">
+                                        <h3 class="product-name">${item.name}</h3>
+                                        <p class="product-price">${item.price}</p>
+                                        <p class="product-description">${item.description}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function displayFallbackOutfitResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="analysis-card">
+                    <h2 class="analysis-title">✨ Style Recommendations</h2>
+                    <p class="analysis-content">Your outfit sounds great! Here are some general tips to enhance your look:</p>
+                    <ul class="suggestions-list">
+                        <li class="suggestion-item">Add a statement accessory</li>
+                        <li class="suggestion-item">Layer with confidence</li>
+                        <li class="suggestion-item">Play with textures</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function displayFallbackMirrorResults() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="compliment">You have great style!</div>
+                <div class="analysis-card">
+                    <h2 class="analysis-title">🪞 Style Feedback</h2>
+                    <p class="analysis-content">Your outfit shows confidence and personal style. Keep experimenting!</p>
+                    <div class="rating">8/10 - Looking great!</div>
+                </div>
+            `;
+        }
+        
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // For now, just prompt user to describe the outfit
+                document.getElementById('mirrorDescription').placeholder = 
+                    "Image uploaded! Now describe your outfit for AI analysis...";
+                document.getElementById('mirrorDescription').focus();
+            }
+        }
+    </script>
+</body>
+</html>

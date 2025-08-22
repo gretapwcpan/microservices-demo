@@ -125,10 +125,332 @@ class SearchDNAResponse(BaseModel):
     insights: List[str]
     visual_dna: str  # Base64 encoded image or SVG
 
+class ProductSearchRequest(BaseModel):
+    query: str
+    user_id: Optional[str] = None
+    max_results: int = 8
+
+class Product(BaseModel):
+    name: str
+    price: str
+    image_url: str
+    description: str
+    attributes: List[str]
+
+class ProductSearchResponse(BaseModel):
+    query: str
+    specificity: str  # broad, refined, specific
+    products: List[Product]
+    total_results: int
+
+class OutfitRequest(BaseModel):
+    user_prompt: str  # "I'm wearing a black dress today"
+    occasion: Optional[str] = None  # "date night", "work", "casual"
+    style_preference: Optional[str] = None  # "elegant", "edgy", "minimalist"
+
+class OutfitRecommendation(BaseModel):
+    outfit_analysis: str
+    recommended_items: List[Product]
+    style_tips: str
+    color_palette: List[str]
+
+class MagicMirrorRequest(BaseModel):
+    image_description: str  # Since we can't process actual images, user describes their outfit
+    user_id: Optional[str] = None
+
+class MagicMirrorResponse(BaseModel):
+    style_analysis: str
+    outfit_rating: str
+    suggestions: List[str]
+    recommended_products: List[Product]
+    compliment: str
+
 # Health check
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "gemini-service"}
+
+# Outfit Advisor - AI suggests items based on what user is wearing
+@app.post("/outfit-advisor", response_model=OutfitRecommendation)
+async def outfit_advisor(request: OutfitRequest):
+    """AI suggests complementary items based on user's current outfit"""
+    
+    if not model:
+        # Fallback recommendations
+        return OutfitRecommendation(
+            outfit_analysis="Your outfit sounds stylish!",
+            recommended_items=[
+                Product(
+                    name="Classic Leather Bag",
+                    price="$89.99",
+                    image_url="https://picsum.photos/400/600?random=1",
+                    description="Perfect accessory to complete your look",
+                    attributes=["accessory", "leather", "classic"]
+                )
+            ],
+            style_tips="Add a statement accessory to elevate your look",
+            color_palette=["black", "gold", "nude"]
+        )
+    
+    prompt = f"""
+    You are a personal stylist for quanBuy. The user describes their outfit:
+    "{request.user_prompt}"
+    
+    Occasion: {request.occasion or "everyday wear"}
+    Style preference: {request.style_preference or "versatile"}
+    
+    Analyze their outfit and suggest 4-6 complementary items they could add.
+    Consider color theory, style harmony, and current fashion trends.
+    
+    Return JSON with:
+    - outfit_analysis: Brief analysis of their current outfit (2 sentences)
+    - recommended_items: Array of 4-6 items, each with:
+      - name: Product name
+      - price: Realistic price
+      - description: Why it complements their outfit
+      - attributes: Style tags
+    - style_tips: 2-3 styling tips for their outfit
+    - color_palette: Array of 3-4 colors that work with their outfit
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        result_text = response.text.strip()
+        if result_text.startswith('```json'):
+            result_text = result_text[7:-3]
+        
+        ai_result = json.loads(result_text)
+        
+        # Add image URLs to products
+        products = []
+        for idx, item in enumerate(ai_result.get('recommended_items', [])):
+            products.append(Product(
+                name=item['name'],
+                price=item['price'],
+                image_url=f"https://picsum.photos/400/600?random={datetime.now().timestamp()}{idx}",
+                description=item['description'],
+                attributes=item.get('attributes', [])
+            ))
+        
+        return OutfitRecommendation(
+            outfit_analysis=ai_result.get('outfit_analysis', 'Your outfit is stylish!'),
+            recommended_items=products,
+            style_tips=ai_result.get('style_tips', 'Keep experimenting with your style!'),
+            color_palette=ai_result.get('color_palette', ['neutral', 'earth', 'accent'])
+        )
+        
+    except Exception as e:
+        logger.error(f"Outfit advisor error: {e}")
+        # Fallback
+        return OutfitRecommendation(
+            outfit_analysis="Your outfit sounds great!",
+            recommended_items=[
+                Product(
+                    name="Versatile Scarf",
+                    price="$45.99",
+                    image_url=f"https://picsum.photos/400/600?random={datetime.now().timestamp()}",
+                    description="A perfect accent piece",
+                    attributes=["accessory", "versatile"]
+                )
+            ],
+            style_tips="Accessories can transform any outfit",
+            color_palette=["neutral", "accent", "classic"]
+        )
+
+# Magic Mirror - Analyze user's outfit from description
+@app.post("/magic-mirror", response_model=MagicMirrorResponse)
+async def magic_mirror(request: MagicMirrorRequest):
+    """AI analyzes user's outfit and provides style feedback"""
+    
+    if not model:
+        return MagicMirrorResponse(
+            style_analysis="You have a unique sense of style!",
+            outfit_rating="8/10 - Looking great!",
+            suggestions=["Add a pop of color", "Try layering"],
+            recommended_products=[],
+            compliment="Your confidence makes the outfit shine!"
+        )
+    
+    prompt = f"""
+    You are a fashion-forward AI stylist with a magical mirror. 
+    The user describes their outfit: "{request.image_description}"
+    
+    Provide honest but encouraging style feedback.
+    
+    Return JSON with:
+    - style_analysis: 2-3 sentences analyzing their style choices
+    - outfit_rating: Rate out of 10 with brief explanation
+    - suggestions: Array of 2-3 specific improvement suggestions
+    - recommended_products: Array of 2 products that would enhance the look, each with:
+      - name: Product name
+      - price: Price
+      - description: Why it works
+      - attributes: Style tags
+    - compliment: A genuine, specific compliment about their outfit
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        result_text = response.text.strip()
+        if result_text.startswith('```json'):
+            result_text = result_text[7:-3]
+        
+        ai_result = json.loads(result_text)
+        
+        # Add image URLs to recommended products
+        products = []
+        for idx, item in enumerate(ai_result.get('recommended_products', [])):
+            products.append(Product(
+                name=item['name'],
+                price=item['price'],
+                image_url=f"https://picsum.photos/400/600?random={datetime.now().timestamp()}{idx}",
+                description=item['description'],
+                attributes=item.get('attributes', [])
+            ))
+        
+        return MagicMirrorResponse(
+            style_analysis=ai_result.get('style_analysis', 'Your style is unique!'),
+            outfit_rating=ai_result.get('outfit_rating', '7/10 - Good choices!'),
+            suggestions=ai_result.get('suggestions', ['Keep being yourself!']),
+            recommended_products=products,
+            compliment=ai_result.get('compliment', 'You look amazing!')
+        )
+        
+    except Exception as e:
+        logger.error(f"Magic mirror error: {e}")
+        return MagicMirrorResponse(
+            style_analysis="Your outfit shows great personal style!",
+            outfit_rating="7/10 - Solid choices",
+            suggestions=["Experiment with accessories", "Try different textures"],
+            recommended_products=[],
+            compliment="Your confidence is your best accessory!"
+        )
+
+# Product Search - Smart search with images
+@app.post("/product-search", response_model=ProductSearchResponse)
+async def product_search(request: ProductSearchRequest):
+    """Smart product search that returns results with images based on query specificity"""
+    
+    # Analyze query specificity
+    words = request.query.lower().split()
+    if len(words) == 1:
+        specificity = "broad"
+        num_results = min(12, request.max_results)
+    elif len(words) == 2:
+        specificity = "refined"
+        num_results = min(8, request.max_results)
+    else:
+        specificity = "specific"
+        num_results = min(4, request.max_results)
+    
+    # Check cache
+    cache_key = f"search:{request.query}:{num_results}"
+    cached = redis_client.get(cache_key)
+    if cached:
+        return ProductSearchResponse(**json.loads(cached))
+    
+    if not model:
+        # Fallback products with images
+        products = []
+        for i in range(num_results):
+            products.append(Product(
+                name=f"{request.query.title()} Style {i+1}",
+                price=f"${49 + i*10}.99",
+                image_url=f"https://source.unsplash.com/400x600/?{request.query.replace(' ', ',')},{i}",
+                description=f"Premium quality {request.query}",
+                attributes=words
+            ))
+        
+        return ProductSearchResponse(
+            query=request.query,
+            specificity=specificity,
+            products=products,
+            total_results=num_results
+        )
+    
+    # Generate with AI
+    prompt = f"""
+    You are a product curator for quanBuy. Generate product search results for: "{request.query}"
+    
+    Query specificity: {specificity}
+    Number of results needed: {num_results}
+    
+    For each product, create:
+    1. A unique, appealing product name
+    2. A realistic price
+    3. Keywords for image search (will be used with Unsplash API)
+    4. A brief, enticing description
+    5. Product attributes/tags
+    
+    Return JSON with array of products, each containing:
+    - name: Product name
+    - price: Price in format "$XX.XX"
+    - image_keywords: Comma-separated keywords for Unsplash
+    - description: 1-2 sentence description
+    - attributes: Array of attributes
+    
+    For {specificity} searches:
+    - broad: Show diverse variety (different styles, colors, types)
+    - refined: Show variations within the category
+    - specific: Show exact matches only
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        result_text = response.text.strip()
+        if result_text.startswith('```json'):
+            result_text = result_text[7:-3]
+        
+        ai_products = json.loads(result_text)
+        
+        # Convert to Product objects with Unsplash image URLs
+        products = []
+        for idx, p in enumerate(ai_products[:num_results]):
+            # Generate Unsplash URL from keywords
+            keywords = p.get('image_keywords', request.query).replace(' ', ',')
+            image_url = f"https://source.unsplash.com/400x600/?{keywords}"
+            
+            products.append(Product(
+                name=p['name'],
+                price=p['price'],
+                image_url=image_url,
+                description=p['description'],
+                attributes=p.get('attributes', words)
+            ))
+        
+        result = ProductSearchResponse(
+            query=request.query,
+            specificity=specificity,
+            products=products,
+            total_results=len(products)
+        )
+        
+        # Cache for 30 minutes
+        redis_client.setex(cache_key, 1800, json.dumps(result.dict()))
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Product search error: {e}")
+        # Fallback with Unsplash images
+        products = []
+        base_keywords = request.query.replace(' ', ',')
+        
+        for i in range(num_results):
+            products.append(Product(
+                name=f"{request.query.title()} Option {i+1}",
+                price=f"${59 + i*15}.99",
+                image_url=f"https://source.unsplash.com/400x600/?{base_keywords},product,{i}",
+                description=f"High-quality {request.query} for your needs",
+                attributes=words
+            ))
+        
+        return ProductSearchResponse(
+            query=request.query,
+            specificity=specificity,
+            products=products,
+            total_results=num_results
+        )
 
 # Mystery Search - AI generates surprising discoveries
 @app.post("/mystery-search", response_model=MysterySearchResponse)

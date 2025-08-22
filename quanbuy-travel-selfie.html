@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>quanBuy - Travel Selfie Magic</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #F5E6D3 0%, #D4A574 40%, #8B5A3C 70%, #704241 100%);
+            background-attachment: fixed;
+            font-family: 'Cinzel', serif;
+            color: #FFF8E7;
+        }
+        
+        /* Header */
+        .header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .brand {
+            font-size: 2.5rem;
+            color: rgba(255, 248, 231, 0.9);
+            letter-spacing: 5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            color: rgba(255, 248, 231, 0.7);
+            letter-spacing: 2px;
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+        
+        .upload-container {
+            background: rgba(255, 248, 231, 0.05);
+            border: 2px dashed rgba(255, 248, 231, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-container:hover {
+            background: rgba(255, 248, 231, 0.08);
+            border-color: rgba(255, 248, 231, 0.5);
+        }
+        
+        .upload-container.dragover {
+            background: rgba(255, 248, 231, 0.15);
+            border-color: rgba(255, 248, 231, 0.7);
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+        
+        .upload-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 248, 231, 0.9);
+        }
+        
+        .upload-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 248, 231, 0.6);
+            margin-bottom: 2rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            padding: 1rem 2.5rem;
+            background: rgba(255, 248, 231, 0.2);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 30px;
+            color: rgba(255, 248, 231, 0.9);
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .upload-btn:hover {
+            background: rgba(255, 248, 231, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Preview Section */
+        .preview-section {
+            max-width: 400px;
+            margin: 2rem auto;
+            display: none;
+        }
+        
+        .preview-section.active {
+            display: block;
+        }
+        
+        .preview-image {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .preview-title {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: rgba(255, 248, 231, 0.8);
+        }
+        
+        /* Destination Selection */
+        .destination-section {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            display: none;
+        }
+        
+        .destination-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 248, 231, 0.9);
+            letter-spacing: 3px;
+        }
+        
+        .destinations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .destination-card {
+            background: rgba(255, 248, 231, 0.05);
+            border: 1px solid rgba(255, 248, 231, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .destination-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 248, 231, 0.4);
+        }
+        
+        .destination-card.selected {
+            border-color: rgba(255, 248, 231, 0.7);
+            background: rgba(255, 248, 231, 0.1);
+        }
+        
+        .destination-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .destination-info {
+            padding: 1rem;
+        }
+        
+        .destination-name {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 248, 231, 0.9);
+        }
+        
+        .destination-description {
+            font-size: 0.9rem;
+            color: rgba(255, 248, 231, 0.6);
+            line-height: 1.4;
+        }
+        
+        .selected-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 248, 231, 0.9);
+            color: #704241;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .destination-card.selected .selected-indicator {
+            display: flex;
+        }
+        
+        /* Generate Button */
+        .generate-section {
+            text-align: center;
+            margin: 3rem auto;
+            display: none;
+        }
+        
+        .generate-section.active {
+            display: block;
+        }
+        
+        .generate-btn {
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, rgba(255, 248, 231, 0.3), rgba(255, 248, 231, 0.1));
+            border: 2px solid rgba(255, 248, 231, 0.5);
+            border-radius: 35px;
+            color: rgba(255, 248, 231, 0.9);
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+        
+        .generate-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 248, 231, 0.4), rgba(255, 248, 231, 0.2));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Results Section */
+        .results-section {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            display: none;
+        }
+        
+        .results-section.active {
+            display: block;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .result-card {
+            background: rgba(255, 248, 231, 0.05);
+            border: 1px solid rgba(255, 248, 231, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .result-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        
+        .result-info {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 248, 231, 0.9);
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .action-btn {
+            padding: 0.7rem 1.5rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 20px;
+            color: rgba(255, 248, 231, 0.8);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 248, 231, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Loading State */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 248, 231, 0.1);
+            border-top: 3px solid rgba(255, 248, 231, 0.5);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            color: rgba(255, 248, 231, 0.7);
+            letter-spacing: 2px;
+        }
+        
+        /* Reset Button */
+        .reset-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem;
+            background: rgba(255, 248, 231, 0.1);
+            border: 1px solid rgba(255, 248, 231, 0.3);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+        }
+        
+        .reset-btn.active {
+            display: flex;
+        }
+        
+        .reset-btn:hover {
+            background: rgba(255, 248, 231, 0.2);
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1 class="brand">quanBuy</h1>
+        <p class="tagline">Travel Selfie Magic - See Yourself Anywhere</p>
+    </header>
+
+    <!-- Upload Section -->
+    <section class="upload-section">
+        <div class="upload-container" id="uploadContainer">
+            <div class="upload-icon">📸</div>
+            <h2 class="upload-title">Upload Your Selfie</h2>
+            <p class="upload-subtitle">Drag & drop your photo or click to browse</p>
+            <input type="file" id="fileInput" class="file-input" accept="image/*">
+            <label for="fileInput" class="upload-btn">Choose Photo</label>
+        </div>
+    </section>
+
+    <!-- Preview Section -->
+    <section class="preview-section" id="previewSection">
+        <img id="previewImage" class="preview-image" alt="Your selfie">
+        <p class="preview-title">Your Selfie</p>
+    </section>
+
+    <!-- Destination Selection -->
+    <section class="destination-section" id="destinationSection">
+        <h2 class="section-title">Choose Your Dream Destinations</h2>
+        <div class="destinations-grid" id="destinationsGrid">
+            <!-- Destinations will be populated here -->
+        </div>
+    </section>
+
+    <!-- Generate Button -->
+    <section class="generate-section" id="generateSection">
+        <button class="generate-btn" id="generateBtn">Generate Travel Photos</button>
+    </section>
+
+    <!-- Loading State -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Creating your travel memories...</p>
+    </div>
+
+    <!-- Results Section -->
+    <section class="results-section" id="resultsSection">
+        <h2 class="section-title">Your Travel Adventures</h2>
+        <div class="results-grid" id="resultsGrid">
+            <!-- Results will be populated here -->
+        </div>
+    </section>
+
+    <!-- Reset Button -->
+    <button class="reset-btn" id="resetBtn">↺</button>
+
+    <script>
+        // Sample destinations data
+        const destinations = [
+            {
+                id: 1,
+                name: "Paris, France",
+                description: "Eiffel Tower at sunset",
+                image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400"
+            },
+            {
+                id: 2,
+                name: "Santorini, Greece",
+                description: "Blue domes and white walls",
+                image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400"
+            },
+            {
+                id: 3,
+                name: "Tokyo, Japan",
+                description: "Cherry blossoms in spring",
+                image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400"
+            },
+            {
+                id: 4,
+                name: "Bali, Indonesia",
+                description: "Tropical paradise beaches",
+                image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=400"
+            },
+            {
+                id: 5,
+                name: "New York, USA",
+                description: "Times Square lights",
+                image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400"
+            },
+            {
+                id: 6,
+                name: "Dubai, UAE",
+                description: "Burj Khalifa skyline",
+                image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400"
+            },
+            {
+                id: 7,
+                name: "Machu Picchu, Peru",
+                description: "Ancient Incan citadel",
+                image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400"
+            },
+            {
+                id: 8,
+                name: "Maldives",
+                description: "Crystal clear waters",
+                image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400"
+            }
+        ];
+
+        let selectedDestinations = [];
+        let uploadedImage = null;
+
+        // DOM Elements
+        const uploadContainer = document.getElementById('uploadContainer');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const destinationSection = document.getElementById('destinationSection');
+        const destinationsGrid = document.getElementById('destinationsGrid');
+        const generateSection = document.getElementById('generateSection');
+        const generateBtn = document.getElementById('generateBtn');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Initialize destinations
+        function initializeDestinations() {
+            destinationsGrid.innerHTML = '';
+            destinations.forEach(dest => {
+                const card = document.createElement('div');
+                card.className = 'destination-card';
+                card.dataset.id = dest.id;
+                card.innerHTML = `
+                    <img src="${dest.image}" alt="${dest.name}" class="destination-image">
+                    <div class="destination-info">
+                        <h3 class="destination-name">${dest.name}</h3>
+                        <p class="destination-description">${dest.description}</p>
+                    </div>
+                    <div class="selected-indicator">✓</div>
+                `;
+                card.addEventListener('click', () => toggleDestination(dest.id, card));
+                destinationsGrid.appendChild(card);
+            });
+        }
+
+        // Toggle destination selection
+        function toggleDestination(id, card) {
+            const index = selectedDestinations.indexOf(id);
+            if (index > -1) {
+                selectedDestinations.splice(index, 1);
+                card.classList.remove('selected');
+            } else {
+                selectedDestinations.push(id);
+                card.classList.add('selected');
+            }
+            
+            // Show/hide generate button
+            if (selectedDestinations.length > 0) {
+                generateSection.classList.add('active');
+            } else {
+                generateSection.classList.remove('active');
+            }
+        }
+
+        // Handle file upload
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    previewImage.src = uploadedImage;
+                    previewSection.classList.add('active');
+                    destinationSection.classList.add('active');
+                    resetBtn.classList.add('active');
+                    initializeDestinations();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Drag and drop functionality
+        uploadContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadContainer.classList.add('dragover');
+        });
+
+        uploadContainer.addEventListener('dragleave', () => {
+            uploadContainer.classList.remove('dragover');
+        });
+
+        uploadContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadContainer.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect({ target: { files: files } });
+            }
+        });
+
+        // Generate travel photos
+        generateBtn.addEventListener('click', generateTravelPhotos);
+
+        function generateTravelPhotos() {
+            if (!uploadedImage || selectedDestinations.length === 0) return;
+            
+            // Show loading
+            loading.classList.add('active');
+            generateSection.classList.remove('active');
+            destinationSection.classList.remove('active');
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                displayResults();
+                loading.classList.remove('active');
+            }, 3000);
+        }
+
+        // Display results
+        function displayResults() {
+            resultsGrid.innerHTML = '';
+            
+            selectedDestinations.forEach(destId => {
+                const destination = destinations.find(d => d.id === destId);
+                const resultCard = document.createElement('div');
+                resultCard.className = 'result-card';
+                resultCard.innerHTML = `
+                    <img src="${destination.image}" alt="${destination.name}" class="result-image">
+                    <div class="result-info">
+                        <h3 class="result-title">You in ${destination.name}</h3>
+                        <div class="result-actions">
+                            <button class="action-btn" onclick="downloadImage('${destination.name}')">Download</button>
+                            <button class="action-btn" onclick="shareImage('${destination.name}')">Share</button>
+                        </div>
+                    </div>
+                `;
+                resultsGrid.appendChild(resultCard);
+            });
+            
+            resultsSection.classList.add('active');
+        }
+
+        // Download image (simulated)
+        function downloadImage(location) {
+            alert(`Downloading your photo from ${location}...`);
+        }
+
+        // Share image (simulated)
+        function shareImage(location) {
+            alert(`Sharing your photo from ${location}...`);
+        }
+
+        // Reset everything
+        resetBtn.addEventListener('click', () => {
+            uploadedImage = null;
+            selectedDestinations = [];
+            fileInput.value = '';
+            previewSection.classList.remove('active');
+            destinationSection.classList.remove('active');
+            generateSection.classList.remove('active');
+            resultsSection.classList.remove('active');
+            resetBtn.classList.remove('active');
+            
+            // Clear selections
+            document.querySelectorAll('.destination-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+        });
+    </script>
+</body>
+</html>
