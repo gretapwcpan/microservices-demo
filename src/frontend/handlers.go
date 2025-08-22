@@ -639,7 +639,7 @@ func stringinSlice(slice []string, val string) bool {
 func (fe *frontendServer) aiStylistHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 
-	if err := templates.ExecuteTemplate(w, "ai_stylist", injectCommonTemplateData(r, map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "ai_quanBuy", injectCommonTemplateData(r, map[string]interface{}{
 		"show_currency": false,
 		"currencies":    []string{}, // Empty currencies since we don't need them
 	})); err != nil {

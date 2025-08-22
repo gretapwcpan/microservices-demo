@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: false
-        image: aiquanBuyservice:latest
+        image: aiquanbuyservice:latest
         imagePullPolicy: Never
         ports:
         - name: http
