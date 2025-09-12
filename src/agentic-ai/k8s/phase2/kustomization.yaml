@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: agentic-ai-phase2
+
+resources:
+- a2a-broker.yaml
+- orchestrator.yaml
+- pricing-optimizer.yaml
+
+commonLabels:
+  version: v2.0.0
+  phase: phase2
+
+images:
+- name: gcr.io/PROJECT_ID/a2a-broker
+  newTag: latest
+- name: gcr.io/PROJECT_ID/multi-agent-orchestrator
+  newTag: latest
+- name: gcr.io/PROJECT_ID/pricing-optimizer-agent
+  newTag: latest
+
+configMapGenerator:
+- name: phase2-config
+  literals:
+  - A2A_BROKER_URL=ws://a2a-broker:8082
+  - ORCHESTRATOR_URL=http://multi-agent-orchestrator:8084
+  - PRICING_OPTIMIZER_URL=http://pricing-optimizer-agent:8085
+  - PHASE=phase2

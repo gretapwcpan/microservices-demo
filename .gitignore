@@ -26,3 +26,6 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+
+# Google AI API key secret file
+google-ai-secret.yaml

@@ -218,3 +218,30 @@ cartDatabase:
 shoppingAssistantService:
   create: false
   name: shoppingassistantservice
+
+# Agentic AI Components
+mcpServer:
+  create: true
+  name: mcp-server
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+shoppingAgent:
+  create: true
+  name: shopping-agent
+  replicas: 3
+  # Set your Google AI API key here or leave empty to use a secret
+  googleAiApiKey: ""
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi

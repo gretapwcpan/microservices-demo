@@ -126,13 +126,92 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 
    Deleting the cluster may take a few minutes.
 
+## Local Development with Kind
+
+[Kind](https://kind.sigs.k8s.io/) (Kubernetes in Docker) provides a lightweight way to run Kubernetes clusters locally for development and testing.
+
+### Prerequisites
+
+1. Install Docker Desktop or Docker Engine
+2. Install Kind:
+   ```sh
+   # On macOS with Homebrew
+   brew install kind
+   
+   # On Linux/macOS with curl
+   curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-$(uname)-amd64
+   chmod +x ./kind
+   sudo mv ./kind /usr/local/bin/kind
+   ```
+
+3. Install kubectl if not already installed
+
+### Quick Start with Kind
+
+1. **Create a Kind cluster:**
+   ```sh
+   kind create cluster --name microservices-demo
+   ```
+
+2. **Verify cluster is running:**
+   ```sh
+   kubectl cluster-info --context kind-microservices-demo
+   ```
+
+3. **Deploy Online Boutique:**
+   ```sh
+   kubectl apply -f ./release/kubernetes-manifests.yaml
+   ```
+
+4. **Wait for all pods to be ready:**
+   ```sh
+   kubectl wait --for=condition=ready pods --all -n default --timeout=300s
+   ```
+
+5. **Access the application:**
+   ```sh
+   kubectl port-forward service/frontend 8080:80
+   ```
+   Visit http://localhost:8080 in your browser.
+
+6. **Cleanup:**
+   ```sh
+   kind delete cluster --name microservices-demo
+   ```
+
+### Testing with Agentic AI Components
+
+To test the AI-enhanced features:
+
+1. **Build Docker images from project root:**
+   ```sh
+   docker build -t mcp-server:latest -f src/agentic-ai/mcp-server/Dockerfile .
+   docker build -t shopping-agent:latest -f src/agentic-ai/agents/shopping-agent/Dockerfile .
+   ```
+
+2. **Load images into Kind:**
+   ```sh
+   kind load docker-image mcp-server:latest --name microservices-demo
+   kind load docker-image shopping-agent:latest --name microservices-demo
+   ```
+
+3. **Deploy with AI components:**
+   ```sh
+   kubectl apply -k kustomize/components/agentic-ai
+   ```
+
+4. **Run tests:**
+   ```sh
+   cd src/agentic-ai/tests
+   python test_phase1.py
+   python test_phase2.py
+   ```
+
 ## Additional deployment options
 
 - **Terraform**: [See these instructions](/terraform) to learn how to deploy Online Boutique using [Terraform](https://www.terraform.io/intro).
 - **Istio / Cloud Service Mesh**: [See these instructions](/kustomize/components/service-mesh-istio/README.md) to deploy Online Boutique alongside an Istio-backed service mesh.
 - **Non-GKE clusters (Minikube, Kind, etc)**: See the [Development guide](/docs/development-guide.md) to learn how you can deploy Online Boutique on non-GKE clusters.
-- **AI assistant using Gemini**: [See these instructions](/kustomize/components/shopping-assistant/README.md) to deploy a Gemini-powered AI assistant that suggests products to purchase based on an image.
-- **And more**: The [`/kustomize` directory](/kustomize) contains instructions for customizing the deployment of Online Boutique with other variations.
 
 ## Documentation
 
