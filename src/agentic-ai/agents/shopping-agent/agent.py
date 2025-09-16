@@ -21,22 +21,20 @@ logger = logging.getLogger(__name__)
 # Initialize FastAPI
 app = FastAPI(title="Shopping Agent", version="2.0.0")
 
-# Configure Gemini
-api_key = os.getenv('GOOGLE_AI_API_KEY', 'dummy-key-for-testing')
-# List of placeholder/invalid keys that should trigger demo mode
-invalid_keys = ['dummy-key-for-testing', 'YOUR_GOOGLE_AI_API_KEY_HERE', '', None]
+# Configure Gemini - REQUIRED
+api_key = os.getenv('GOOGLE_AI_API_KEY')
 
-if api_key and api_key not in invalid_keys and len(api_key) > 20:  # Real API keys are longer
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        logger.info("Gemini AI configured with API key")
-    except Exception as e:
-        logger.warning(f"Failed to configure Gemini: {e}")
-        model = None
-else:
-    model = None
-    logger.warning(f"No valid Google AI API key found (got: '{api_key[:20]}...' if len > 20) - running in demo mode")
+if not api_key:
+    logger.error("GOOGLE_AI_API_KEY environment variable is required")
+    raise ValueError("GOOGLE_AI_API_KEY environment variable must be set")
+
+try:
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    logger.info("Gemini AI configured successfully")
+except Exception as e:
+    logger.error(f"Failed to configure Gemini: {e}")
+    raise
 
 # MCP Server URL
 MCP_SERVER_URL = os.getenv('MCP_SERVER_URL', 'http://mcp-server:8080')
@@ -111,71 +109,32 @@ def parse_gemini_response(response_text: str) -> Dict[str, Any]:
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """Main chat endpoint"""
+    """Main chat endpoint - powered by Gemini AI"""
     try:
-        # If no Gemini model (no API key), work in demo mode
-        if model is None or api_key in invalid_keys:
-            # Demo mode - simulate AI behavior without calling Gemini
-            message_lower = request.message.lower()
+        # Use Gemini to understand the user's intent
+        prompt = f"{SYSTEM_PROMPT}\n\nUser ({request.user_id}): {request.message}"
+        
+        try:
+            gemini_response = model.generate_content(prompt)
             
-            if "product" in message_lower or "show" in message_lower or "browse" in message_lower:
-                # Browse products
-                result = call_mcp_server("search_products", {"query": ""})
-                if result.get("success"):
-                    product_list = result.get("data", {}).get("products", [])
-                    products = [p.get("id") for p in product_list[:5]]
-                    return ChatResponse(
-                        response="Here are some of our featured products! (Running in demo mode - no AI)",
-                        success=True,
-                        products=products,
-                        actions_performed=["Browsed catalog (demo mode)"]
-                    )
-            elif "cart" in message_lower:
-                # Get cart
-                result = call_mcp_server("get_cart", {"user_id": request.user_id})
-                if result.get("success"):
-                    cart_items = result.get("data", {}).get("items", [])
-                    if cart_items:
-                        response = f"You have {len(cart_items)} items in your cart. (Demo mode)"
-                    else:
-                        response = "Your cart is currently empty. (Demo mode)"
-                    return ChatResponse(
-                        response=response,
-                        success=True,
-                        products=[],
-                        actions_performed=["Retrieved cart (demo mode)"]
-                    )
-            elif "search" in message_lower:
-                # Extract search term (simple approach)
-                words = request.message.split()
-                search_idx = words.index("search") if "search" in words else -1
-                if search_idx >= 0 and search_idx < len(words) - 1:
-                    query = " ".join(words[search_idx + 1:])
-                else:
-                    query = "vintage"  # default search
+            # Check if response is valid
+            if not gemini_response or not gemini_response.text:
+                logger.warning("Empty response from Gemini")
+                return ChatResponse(
+                    response="I'm having trouble understanding. Could you please rephrase your request?",
+                    success=True,
+                    products=[],
+                    actions_performed=[]
+                )
                 
-                result = call_mcp_server("search_products", {"query": query})
-                if result.get("success"):
-                    product_list = result.get("data", {}).get("products", [])
-                    products = [p.get("id") for p in product_list[:5]]
-                    return ChatResponse(
-                        response=f"I found products matching '{query}'! (Demo mode - no AI)",
-                        success=True,
-                        products=products,
-                        actions_performed=[f"Searched for: {query} (demo mode)"]
-                    )
-            
-            # Default response
+        except Exception as gemini_error:
+            logger.error(f"Gemini API error: {gemini_error}")
             return ChatResponse(
-                response="I'm a shopping assistant running in demo mode. Try asking me to 'show products', 'search vintage', or 'show my cart'!",
-                success=True,
+                response="I'm experiencing technical difficulties. Please try again in a moment.",
+                success=False,
                 products=[],
                 actions_performed=[]
             )
-        
-        # Ask Gemini to understand the user's intent
-        prompt = f"{SYSTEM_PROMPT}\n\nUser ({request.user_id}): {request.message}"
-        gemini_response = model.generate_content(prompt)
         
         # Parse Gemini's response
         parsed = parse_gemini_response(gemini_response.text)
@@ -243,7 +202,7 @@ async def chat(request: ChatRequest):
     except Exception as e:
         logger.error(f"Error in chat endpoint: {e}")
         return ChatResponse(
-            response="I apologize, but I encountered an error. Please try again.",
+            response=f"I encountered an error: {str(e)}",
             success=False,
             products=[],
             actions_performed=[]

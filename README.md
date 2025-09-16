@@ -173,39 +173,144 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
    kubectl port-forward service/frontend 8080:80
    ```
    Visit http://localhost:8080 in your browser.
+   
+   **Note**: If port 8080 is already in use, try a different port:
+   ```sh
+   kubectl port-forward service/frontend 8090:80
+   ```
+   Then visit http://localhost:8090 instead.
 
 6. **Cleanup:**
    ```sh
    kind delete cluster --name microservices-demo
    ```
 
-### Testing with Agentic AI Components
+### Testing AI-Enhanced Components Locally
 
-To test the AI-enhanced features:
+The project includes AI-powered components that enhance the shopping experience using Google's Gemini AI.
 
-1. **Build Docker images from project root:**
+#### Components Overview
+
+- **MCP Server**: REST API gateway that translates HTTP requests to gRPC calls for microservices
+- **Shopping Agent**: AI-powered chat interface using Google Gemini for natural language shopping assistance
+
+#### Quick Setup and Testing
+
+1. **Deploy the Shopping Agent with Gemini AI:**
    ```sh
-   docker build -t mcp-server:latest -f src/agentic-ai/mcp-server/Dockerfile .
-   docker build -t shopping-agent:latest -f src/agentic-ai/agents/shopping-agent/Dockerfile .
+   # This script builds, loads, and deploys the Shopping Agent
+   ./deploy-gemini-agent.sh
    ```
 
-2. **Load images into Kind:**
+2. **Configure Google AI API Key:**
+   
+   Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey) and update `google-ai-secret.yaml`:
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: google-ai-secrets
+   type: Opaque
+   stringData:
+     api-key: "YOUR_ACTUAL_API_KEY_HERE"  # Replace with your key
+   ```
+   
+   Apply the secret:
    ```sh
-   kind load docker-image mcp-server:latest --name microservices-demo
-   kind load docker-image shopping-agent:latest --name microservices-demo
+   kubectl apply -f google-ai-secret.yaml
    ```
 
-3. **Deploy with AI components:**
+3. **Run the E2E Test Suite:**
    ```sh
-   kubectl apply -k kustomize/components/agentic-ai
+   # Comprehensive test of the Shopping Agent
+   ./test-shopping-agent.sh
+   ```
+   
+   This test script will:
+   - Verify all services are running
+   - Test Shopping Agent health
+   - Run various chat scenarios (greeting, browsing, searching, cart operations)
+   - Display Gemini AI responses
+   - Check MCP Server connectivity
+
+#### Manual Testing
+
+For manual interaction with the Shopping Agent:
+
+```sh
+# 1. Port-forward the service
+kubectl port-forward service/shopping-agent 8084:8081
+
+# 2. Test various scenarios
+# Health check
+curl http://localhost:8084/health | python3 -m json.tool
+
+# Natural language chat
+curl -X POST http://localhost:8084/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "test", "message": "Show me some vintage cameras"}' \
+  | python3 -m json.tool
+
+# Browse products
+curl -X POST http://localhost:8084/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "test", "message": "What products do you have?"}' \
+  | python3 -m json.tool
+
+# Cart operations
+curl -X POST http://localhost:8084/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "test", "message": "What is in my cart?"}' \
+  | python3 -m json.tool
+```
+
+#### Testing Scenarios
+
+**With Gemini API Key:**
+- Natural language understanding
+- Context-aware responses
+- Intelligent product recommendations
+- Complex query handling
+
+**Without API Key (Demo Mode):**
+- Basic keyword matching for product searches
+- Limited to predefined responses
+
+#### Troubleshooting
+
+1. **Pods not starting:**
+   ```sh
+   kubectl describe pod <pod-name>
+   kubectl logs <pod-name>
    ```
 
-4. **Run tests:**
+2. **Image not found:**
+   Ensure images are loaded into Kind:
    ```sh
-   cd src/agentic-ai/tests
-   python test_phase1.py
-   python test_phase2.py
+   docker exec -it microservices-demo-control-plane crictl images | grep -E "mcp-server|shopping-agent"
    ```
+
+3. **Port-forward issues:**
+   Kill existing port-forwards:
+   ```sh
+   pkill -f "port-forward"
+   ```
+
+4. **Resource issues:**
+   If services are crashing, restart the Kind cluster:
+   ```sh
+   kind delete cluster --name microservices-demo
+   kind create cluster --name microservices-demo
+   ```
+
+#### Clean Up AI Components
+
+To remove only the AI components while keeping the base application:
+```sh
+kubectl delete -f kubernetes-manifests/mcp-server.yaml
+kubectl delete -f kubernetes-manifests/shopping-agent.yaml
+kubectl delete secret google-ai-secrets
+```
 
 ## Additional deployment options
 

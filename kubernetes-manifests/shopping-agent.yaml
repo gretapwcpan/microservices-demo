@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: shopping-agent
-        image: shopping-agent:v7
+        image: shopping-agent:v9
         imagePullPolicy: Never
         ports:
         - containerPort: 8081
@@ -28,7 +28,7 @@ spec:
             secretKeyRef:
               name: google-ai-secrets
               key: api-key
-              optional: true
+              optional: false
         - name: MCP_SERVER_URL
           value: "http://mcp-server:8080"
         resources:
@@ -66,11 +66,3 @@ spec:
     name: http
   selector:
     app: shopping-agent
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: google-ai-secrets
-type: Opaque
-stringData:
-  api-key: "YOUR_GOOGLE_AI_API_KEY_HERE"  # <-- Replace this with your actual Google AI API key
